@@ -1,0 +1,13 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/server/marketplaceApi.ts')
+s=p.read_text()
+s=s.replace('''const memoryReviews: any[] = [];''','''const memoryReviews: any[] = [];
+const memoryComplaints: any[] = [];''',1)
+needle='''  app.get("/api/admin/reviews", async (req, res) => {'''
+routes='''  app.post("/api/workers/:id/complaints", async (req, res) => { const customerName = String(req.body.customerName || "").trim(); const customerContact = String(req.body.customerContact || "").trim(); const reason = String(req.body.reason || "").trim(); const details = String(req.body.details || "").trim(); if (!customerName || !reason || !details || details.length > 2000) return res.status(400).json({ error: "Name, complaint reason, and details are required (maximum 2,000 characters)." }); const complaint = { complaintId: createReference(), workerId: req.params.id, workerName: String(req.body.workerName || "Worker"), customerName, customerContact, reason, details, status: "Open", createdAt: now(), updatedAt: now() }; const database = await getDb(); if (database) await database.collection("workerComplaints").insertOne(complaint); else memoryComplaints.unshift(complaint); return res.status(201).json(complaint); });
+  app.get("/api/admin/complaints", async (req, res) => { if (!await requireAdmin(req)) return res.status(401).json({ error: "Admin login required" }); const database = await getDb(); if (!database) return res.json(memoryComplaints.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt))); return res.json(await database.collection("workerComplaints").find({}).sort({ createdAt: -1 }).toArray()); });
+  app.patch("/api/admin/complaints/:id", async (req, res) => { if (!await requireAdmin(req)) return res.status(401).json({ error: "Admin login required" }); const status = ["Open", "Investigating", "Resolved", "Dismissed"].includes(req.body.status) ? req.body.status : "Investigating"; const database = await getDb(); if (database) { const result = await database.collection("workerComplaints").findOneAndUpdate({ complaintId: req.params.id }, { $set: { status, adminNote: String(req.body.adminNote || "").trim(), updatedAt: now() } }, { returnDocument: "after" }); return result ? res.json(result) : res.status(404).json({ error: "Complaint not found" }); } const item = memoryComplaints.find((entry) => entry.complaintId === req.params.id); if (!item) return res.status(404).json({ error: "Complaint not found" }); Object.assign(item, { status, adminNote: String(req.body.adminNote || "").trim(), updatedAt: now() }); return res.json(item); });
+'''
+if needle not in s: raise SystemExit('admin reviews route not found')
+s=s.replace(needle,routes+needle,1)
+p.write_text(s)

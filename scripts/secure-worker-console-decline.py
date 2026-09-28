@@ -1,0 +1,18 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/client/src/pages/WorkerConsole.tsx')
+s=p.read_text()
+s=s.replace('import { ArrowLeft', 'import { startLogin } from "@/const";\nimport { useAuth } from "@/_core/hooks/useAuth";\nimport { ArrowLeft',1)
+s=s.replace('export default function WorkerConsole() {\n  const workerId', 'export default function WorkerConsole() {\n  const { user, loading: authLoading } = useAuth();\n  const workerId',1)
+s=s.replace('  const acceptRequest = async () => {', '  const declineRequest = async () => { if (!pendingRequest?._id) return; const response = await fetch(`/api/bookings/${pendingRequest._id}/decline`, { method: "POST" }); if (response.ok) { const updated = await response.json(); setPendingRequest(updated); setRequestStatus(updated.status); localStorage.setItem("labrkp_pending_booking", JSON.stringify(updated)); } };\n  const acceptRequest = async () => {',1)
+s=s.replace('  return <div className="min-h-screen', '  if (authLoading) return <div className="grid min-h-screen place-items-center bg-[#f5f7f2] text-sm font-semibold text-[#52645c]">Checking worker access…</div>;\n  if (!user) return <div className="grid min-h-screen place-items-center bg-[#f5f7f2] p-6"><div className="max-w-md rounded-[28px] bg-white p-8 text-center shadow-sm"><div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[#dff3a9] text-[#355d3d]"><ShieldCheck size={25} /></div><h1 className="mt-5 font-display text-2xl font-semibold text-[#203a34]">Worker login required</h1><p className="mt-3 text-sm leading-6 text-[#718078]">Only an approved LABRKP worker can view assigned customer requests.</p><button onClick={() => startLogin()} className="mt-6 rounded-full bg-[#203a34] px-6 py-3 text-sm font-bold text-white">Sign in</button><Link href="/" className="mt-3 block text-sm font-semibold text-[#6c875a]">Back to marketplace</Link></div></div>;\n  return <div className="min-h-screen',1)
+s=s.replace('<button className="rounded-full border border-[#cfdcc5] bg-white px-4 py-2.5 text-sm font-bold text-[#607267]">Decline</button>', '<button onClick={() => void declineRequest()} disabled={requestStatus !== "Pending"} className="rounded-full border border-[#efc9bf] bg-white px-4 py-2.5 text-sm font-bold text-[#a45843] disabled:opacity-50">Decline</button>',1)
+s=s.replace('{requestStatus === "Accepted" && <><span', '{requestStatus === "Rejected" && <span className="rounded-full bg-[#ffe8e0] px-3 py-2 text-[#a45843]">Request declined · Customer notified</span>}{requestStatus === "Accepted" && <><span',1)
+p.write_text(s)
+
+track=Path('/home/ubuntu/labrkp-workforce/client/src/pages/BookingTrack.tsx')
+t=track.read_text()
+t=t.replace('  const accepted = status?.status === "Accepted";', '  const accepted = ["Accepted", "OnTheWay", "Arrived"].includes(status?.status);\n  const rejected = status?.status === "Rejected";',1)
+t=t.replace('{accepted ? "Accepted · On the way" : "Waiting for worker"}', '{rejected ? "Request declined" : accepted ? "Accepted · On the way" : "Waiting for worker"}',1)
+t=t.replace('{accepted ? "Worker is on the way" : "Request sent"}', '{rejected ? "Worker unavailable" : accepted ? "Worker is on the way" : "Request sent"}',1)
+t=t.replace('{accepted ? `Approximately ${status.etaMinutes || status.eta || "20 minutes"} away from you` : "Worker acceptance is required before live tracking starts"}', '{rejected ? (status.customerNotification || "Your booking request was declined. Please choose another worker.") : accepted ? `Approximately ${status.etaMinutes || status.eta || "20 minutes"} away from you` : "Worker acceptance is required before live tracking starts"}',1)
+track.write_text(t)

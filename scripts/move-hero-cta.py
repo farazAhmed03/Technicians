@@ -1,0 +1,11 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/client/src/pages/Home.tsx')
+s=p.read_text()
+search_end='''<button onClick={scrollToDirectory} className="rounded-full bg-[#d8f479] px-6 py-3.5 text-sm font-bold text-[#263d32] transition hover:bg-[#e7ff9a]">Find help</button></div></div></section>'''
+hero_cta='''<button onClick={scrollToDirectory} className="rounded-full bg-[#d8f479] px-6 py-3.5 text-sm font-bold text-[#263d32] transition hover:bg-[#e7ff9a]">Find help</button></div><div className="relative z-10 mt-3 flex flex-col items-center justify-center gap-3 sm:flex-row"><button onClick={() => showNotice("Tell us what you need — matching is coming next.")} className="flex items-center gap-2 rounded-full bg-[#294139] px-5 py-2.5 text-sm font-semibold text-white shadow-sm">Request a match <ArrowRight size={15} /></button><Link href="/become-a-worker" className="flex items-center gap-2 rounded-full border border-[#b9d391] bg-white px-5 py-2.5 text-sm font-semibold text-[#355d3d] shadow-sm transition hover:bg-[#f4f9ec]">Join us as a worker <ArrowRight size={15} /></Link></div></div></section>'''
+if search_end not in s: raise SystemExit('hero search end not found')
+s=s.replace(search_end,hero_cta,1)
+lower='''<div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-[24px] bg-[#eaf3dc] px-6 py-5 sm:flex-row"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#d6f477] text-[#355d3d]"><Bell size={18} /></div><p className="text-sm text-[#526853]"><strong className="text-[#294139]">Need something specific?</strong> Tell us what you need and we’ll match you.</p></div><div className="flex flex-wrap items-center gap-2"><button onClick={() => showNotice("Tell us what you need — matching is coming next.")} className="flex items-center gap-2 rounded-full bg-[#294139] px-5 py-2.5 text-sm font-semibold text-white">Request a match <ArrowRight size={15} /></button><Link href="/become-a-worker" className="flex items-center gap-2 rounded-full border border-[#b9d391] bg-white px-5 py-2.5 text-sm font-semibold text-[#355d3d] transition hover:bg-[#f4f9ec]">Join us as a worker <ArrowRight size={15} /></Link></div></div>'''
+if lower not in s: raise SystemExit('lower CTA not found')
+s=s.replace(lower,'',1)
+p.write_text(s)

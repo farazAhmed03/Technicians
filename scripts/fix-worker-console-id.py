@@ -1,0 +1,11 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/client/src/pages/WorkerConsole.tsx')
+s=p.read_text()
+s=s.replace('''  const workerId = "1";
+  const [pendingRequest, setPendingRequest] = useState<any>(null);''','''  const [workerId, setWorkerId] = useState("");
+  const [pendingRequest, setPendingRequest] = useState<any>(null);''',1)
+old='''  useEffect(() => { if (authLoading || !user) return; let active = true; fetch(`/api/workers/${workerId}/bookings`).then((response) => { if (response.status === 401) { setAccessDenied(true); return []; } return response.ok ? response.json() : []; }).then((rows) => { if (!active) return; const booking = rows.find((item: any) => ["Pending", "Accepted", "OnTheWay"].includes(item.status)); if (booking) { setPendingRequest(booking); setRequestStatus(booking.status); } else { try { const fallback = JSON.parse(localStorage.getItem("labrkp_pending_booking") || "null"); if (fallback?.workerId === workerId) { setPendingRequest(fallback); setRequestStatus(fallback.status || "Pending"); } } catch {} } }).catch(() => {}).finally(() => { if (active) setRequestLoading(false); }); return () => { active = false; }; }, [authLoading, user]);'''
+new='''  useEffect(() => { if (authLoading || !user) return; let active = true; setRequestLoading(true); fetch("/api/workers/my-applications").then((response) => response.ok ? response.json() : []).then((applications) => { const approved = applications.find((item: any) => item.status === "Approved"); if (!approved) { setAccessDenied(true); return null; } setWorkerId(approved.applicationId); return fetch(`/api/workers/${encodeURIComponent(approved.applicationId)}/bookings`).then((response) => { if (response.status === 401) { setAccessDenied(true); return []; } return response.ok ? response.json() : []; }); }).then((rows) => { if (!active || !rows) return; const booking = rows.find((item: any) => ["Pending", "Accepted", "OnTheWay"].includes(item.status)); if (booking) { setPendingRequest(booking); setRequestStatus(booking.status); } }).catch(() => setAccessDenied(true)).finally(() => { if (active) setRequestLoading(false); }); return () => { active = false; }; }, [authLoading, user]);'''
+if old not in s: raise SystemExit('booking effect not found')
+s=s.replace(old,new,1)
+p.write_text(s)

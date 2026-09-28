@@ -1,0 +1,7 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/server/marketplaceApi.ts')
+s=p.read_text()
+s=s.replace('image: application.gender === "Female" ? "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85" : "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=900&q=85"', 'image: application.documents?.profilePhoto?.url || (application.gender === "Female" ? "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85" : "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=900&q=85")',1)
+s=s.replace('for (const field of ["diplomaProof", "skillProof"]) {', 'for (const field of ["profilePhoto", "diplomaProof", "skillProof"]) {',1)
+s=s.replace('const application = { applicationId: createReference(), ...req.body, skill: resolveWorkerSkill(String(req.body.skill), req.body.customSkill), diplomaProof: undefined, skillProof: undefined, documents, status: "Under Review", createdAt: now(), updatedAt: now() };', 'if (!documents.profilePhoto || !documents.diplomaProof) return res.status(400).json({ error: "Profile photo and diploma proof are required" });\n      const application = { applicationId: createReference(), ...req.body, skill: resolveWorkerSkill(String(req.body.skill), req.body.customSkill), profilePhoto: undefined, diplomaProof: undefined, skillProof: undefined, documents, status: "Under Review", createdAt: now(), updatedAt: now() };',1)
+p.write_text(s)

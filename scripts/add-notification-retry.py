@@ -1,0 +1,9 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/server/marketplaceApi.ts')
+s=p.read_text()
+needle='''  app.post("/api/complaints/:id/appeals", async (req, res) => {'''
+route='''  app.post("/api/admin/complaints/:id/retry-delivery", async (req, res) => { if (!await requireAdmin(req)) return res.status(401).json({ error: "Admin login required" }); const database = await getDb(); const complaint = database ? await database.collection("workerComplaints").findOne({ complaintId: req.params.id }) : memoryComplaints.find((entry) => entry.complaintId === req.params.id); if (!complaint) return res.status(404).json({ error: "Complaint not found" }); const kind = req.body.kind === "resolution" ? "resolution" : "confirmation"; const delivery = await deliverExternalNotification({ type: kind === "resolution" ? "complaint-resolved-retry" : "complaint-received-retry", title: kind === "resolution" ? "LABRKP complaint resolved" : "LABRKP complaint received", message: kind === "resolution" ? `Your complaint ${complaint.complaintId} has been marked resolved. You may appeal if you disagree.` : `Your complaint ${complaint.complaintId} has been received and is under review.`, complaintId: complaint.complaintId, recipientEmail: complaint.customerContact?.includes("@") ? complaint.customerContact : undefined, recipientPhone: complaint.customerContact?.includes("@") ? undefined : complaint.customerContact }); const field = kind === "resolution" ? "resolutionDelivery" : "delivery"; if (database) await database.collection("workerComplaints").updateOne({ complaintId: req.params.id }, { $set: { [field]: delivery, updatedAt: now() } }); else Object.assign(complaint, { [field]: delivery, updatedAt: now() }); return res.json({ complaintId: complaint.complaintId, kind, delivery }); });
+'''
+if needle not in s: raise SystemExit('appeal route marker missing')
+s=s.replace(needle,route+needle,1)
+p.write_text(s)

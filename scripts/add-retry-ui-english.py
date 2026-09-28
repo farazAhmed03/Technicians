@@ -1,0 +1,15 @@
+from pathlib import Path
+p=Path('/home/ubuntu/labrkp-workforce/client/src/pages/AdminVerification.tsx')
+s=p.read_text()
+s=s.replace('''  const updateComplaint = async (complaint: any, status: string, priority?: string) => {''','''  const retryDelivery = async (complaint: any, kind: "confirmation" | "resolution") => { const response = await fetch(`/api/admin/complaints/${complaint.complaintId}/retry-delivery`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind }) }); if (response.ok) void load(); };
+  const updateComplaint = async (complaint: any, status: string, priority?: string) => {''',1)
+s=s.replace('''Signed in as {user.email || user.name || "admin"}. Approve karne par worker public directory mein publish ho jata hai.''','''Signed in as {user.email || user.name || "admin"}. Approved workers are published to the public directory.''',1)
+old='''<p className="mt-3 text-sm leading-6 text-[#65756c]">{complaint.details}</p></div><div className="flex shrink-0 flex-wrap gap-2">'''
+new='''<p className="mt-3 text-sm leading-6 text-[#65756c]">{complaint.details}</p><div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">{(complaint.delivery || []).map((item: any) => <span key={`initial-${item.channel}`} className={`rounded-full px-2.5 py-1 font-bold ${item.status === "failed" ? "bg-[#ffe8e0] text-[#a45843]" : "bg-[#eef6de] text-[#52733e]"}`}>{item.channel}: {item.status}</span>)}{(complaint.delivery || []).some((item: any) => item.status === "failed" || item.status === "not-configured") && <button onClick={() => void retryDelivery(complaint, "confirmation")} className="rounded-full border border-[#dce5d9] px-2.5 py-1 font-bold text-[#52675b]">Retry confirmation delivery</button>}{(complaint.status === "Resolved" && (complaint.resolutionDelivery || []).length > 0) && <>{(complaint.resolutionDelivery || []).map((item: any) => <span key={`resolution-${item.channel}`} className={`rounded-full px-2.5 py-1 font-bold ${item.status === "failed" ? "bg-[#ffe8e0] text-[#a45843]" : "bg-[#eef6de] text-[#52733e]`}>{item.channel} resolution: {item.status}</span>)}{(complaint.resolutionDelivery || []).some((item: any) => item.status === "failed" || item.status === "not-configured") && <button onClick={() => void retryDelivery(complaint, "resolution")} className="rounded-full border border-[#dce5d9] px-2.5 py-1 font-bold text-[#52675b]">Retry resolution delivery</button>}</>}</div></div><div className="flex shrink-0 flex-wrap gap-2">'''
+# Correct typo in generated class string after replacement below.
+if old not in s: raise SystemExit('complaint details marker missing')
+s=s.replace(old,new,1)
+s=s.replace('''text-[#eef6de] text-[#52733e]`}>{item.channel} resolution''','''text-[#eef6de] text-[#52733e]`}>{item.channel} resolution''')
+# Replace Roman Urdu remnants that are user-facing in this file.
+s=s.replace('''Approve karne par worker public directory mein publish ho jata hai.''','''Approved workers are published to the public directory.''')
+p.write_text(s)
