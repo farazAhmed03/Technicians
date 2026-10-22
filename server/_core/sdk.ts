@@ -155,7 +155,12 @@ class SDKServer {
 
   private getSessionSecret() {
     const secret = ENV.cookieSecret;
-    return new TextEncoder().encode(secret);
+    if (!secret || secret.length < 16) {
+      if (ENV.isProduction) {
+        throw new Error("[Security] JWT_SECRET must be configured and at least 16 characters long in production");
+      }
+    }
+    return new TextEncoder().encode(secret || "labrkp-dev-insecure-fallback-jwt-secret-key-32chars!");
   }
 
   /**

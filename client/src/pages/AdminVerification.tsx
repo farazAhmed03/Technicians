@@ -8,7 +8,7 @@ type PublishedWorker = any;
 
 export default function AdminVerification() {
   const { user, loading: authLoading, logout } = useAuth();
-  const [adminEmail, setAdminEmail] = useState("yaseenn2917@gmail.com");
+  const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
